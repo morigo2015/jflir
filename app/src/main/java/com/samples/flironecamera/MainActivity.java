@@ -26,6 +26,9 @@ import com.flir.thermalsdk.live.connectivity.ConnectionStatus;
 import com.flir.thermalsdk.live.connectivity.ConnectionStatusListener;
 import com.flir.thermalsdk.live.discovery.DiscoveryEventListener;
 import com.flir.thermalsdk.log.ThermalLog;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.LinkedBlockingQueue;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
     private LinkedBlockingQueue<FrameDataHolder> framesBuffer = new LinkedBlockingQueue(21);
     private UsbPermissionHandler usbPermissionHandler = new UsbPermissionHandler();
 
+    BarcodeScanner barcodeScanner;
+
+
     /**
      * Show message on the screen
      */
@@ -80,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
         permissionHandler = new PermissionHandler(showMessage, MainActivity.this);
 
-        cameraHandler = new CameraHandler();
+        barcodeScanner = new BarcodeScanner(getApplicationContext());
+        cameraHandler = new CameraHandler(barcodeScanner);
 
         setupViews();
 

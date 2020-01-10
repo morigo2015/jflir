@@ -10,6 +10,12 @@
 package com.samples.flironecamera;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.Log;
 
 import com.flir.thermalsdk.androidsdk.image.BitmapAndroid;
@@ -21,6 +27,7 @@ import com.flir.thermalsdk.live.Identity;
 import com.flir.thermalsdk.live.connectivity.ConnectionStatusListener;
 import com.flir.thermalsdk.live.discovery.DiscoveryEventListener;
 import com.flir.thermalsdk.live.discovery.DiscoveryFactory;
+import com.flir.thermalsdk.live.remote.Calibration;
 import com.flir.thermalsdk.live.streaming.ThermalImageStreamListener;
 
 import org.jetbrains.annotations.Nullable;
@@ -54,6 +61,7 @@ class CameraHandler {
     private static final String TAG = "CameraHandler";
 
     private StreamDataListener streamDataListener;
+    private BarcodeScanner barcodeScanner;
 
     public interface StreamDataListener {
         void images(FrameDataHolder dataHolder);
@@ -72,7 +80,8 @@ class CameraHandler {
         void stopped();
     }
 
-    public CameraHandler() {
+    public CameraHandler(BarcodeScanner barcodeScanner) {
+        this.barcodeScanner = barcodeScanner;
     }
 
     /**
@@ -198,6 +207,7 @@ class CameraHandler {
         }
     };
 
+
     /**
      * Function to process a Thermal Image and update UI
      */
@@ -217,9 +227,12 @@ class CameraHandler {
 
             //Get a bitmap with the visual image, it might have different dimensions then the bitmap from THERMAL_ONLY
             Bitmap dcBitmap = BitmapAndroid.createBitmap(thermalImage.getFusion().getPhoto()).getBitMap();
+            //            dcBitmap = drawText(dcBitmap);
 
+            dcBitmap = barcodeScanner.scanBarcode(dcBitmap);
             Log.d(TAG,"adding images to cache");
             streamDataListener.images(msxBitmap,dcBitmap);
+
         }
     };
 
