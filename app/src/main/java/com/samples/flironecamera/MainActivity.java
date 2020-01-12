@@ -10,10 +10,13 @@
  * ******************************************************************/
 package com.samples.flironecamera;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +35,8 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.LinkedBlockingQueue;
 import androidx.appcompat.app.AppCompatActivity;
+
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 /**
  * Sample application for scanning a FLIR ONE or a built in emulator
@@ -341,4 +346,13 @@ public class MainActivity extends AppCompatActivity {
         photoImage = findViewById(R.id.photo_image);
     }
 
+    /** Called when the user taps the Send button */
+    public void startScan(View view) {
+        // Do something in response to button
+        Intent intent = new Intent(this, ScanActivity.class);
+//        EditText editText = (EditText) findViewById(R.id.editText);
+//        String message = editText.getText().toString();
+//        intent.putExtra(EXTRA_MESSAGE, message);
+        startActivity(intent);
+    }
 }
