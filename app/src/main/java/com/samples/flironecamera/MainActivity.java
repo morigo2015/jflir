@@ -10,13 +10,11 @@
  * ******************************************************************/
 package com.samples.flironecamera;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,14 +27,10 @@ import com.flir.thermalsdk.live.connectivity.ConnectionStatus;
 import com.flir.thermalsdk.live.connectivity.ConnectionStatusListener;
 import com.flir.thermalsdk.live.discovery.DiscoveryEventListener;
 import com.flir.thermalsdk.log.ThermalLog;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.LinkedBlockingQueue;
 import androidx.appcompat.app.AppCompatActivity;
-
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 /**
  * Sample application for scanning a FLIR ONE or a built in emulator
@@ -57,18 +51,13 @@ public class MainActivity extends AppCompatActivity {
     //Handles network camera operations
     private CameraHandler cameraHandler;
 
+    BarcodeScanner barcodeScanner;
+
     private Identity connectedIdentity = null;
     private TextView connectionStatus;
     private TextView discoveryStatus;
 
-    private ImageView msxImage;
-    private ImageView photoImage;
-
-    private LinkedBlockingQueue<FrameDataHolder> framesBuffer = new LinkedBlockingQueue(21);
     private UsbPermissionHandler usbPermissionHandler = new UsbPermissionHandler();
-
-    BarcodeScanner barcodeScanner;
-
 
     /**
      * Show message on the screen
@@ -246,7 +235,8 @@ public class MainActivity extends AppCompatActivity {
                     switch (connectionStatus) {
                         case CONNECTING: break;
                         case CONNECTED: {
-                            cameraHandler.startStream(streamDataListener);
+                            //cameraHandler.startStream(streamDataListener);
+                            startProcessing();
                         }
                         break;
                         case DISCONNECTING: break;
@@ -254,43 +244,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-        }
-    };
-
-    private final CameraHandler.StreamDataListener streamDataListener = new CameraHandler.StreamDataListener() {
-
-        @Override
-        public void images(FrameDataHolder dataHolder) {
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    msxImage.setImageBitmap(dataHolder.msxBitmap);
-                    photoImage.setImageBitmap(dataHolder.dcBitmap);
-                }
-            });
-        }
-
-        @Override
-        public void images(Bitmap msxBitmap, Bitmap dcBitmap) {
-
-            try {
-                framesBuffer.put(new FrameDataHolder(msxBitmap,dcBitmap));
-            } catch (InterruptedException e) {
-                //if interrupted while waiting for adding a new item in the queue
-                Log.e(TAG,"images(), unable to add incoming images to frames buffer, exception:"+e);
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG,"framebuffer size:"+framesBuffer.size());
-                    FrameDataHolder poll = framesBuffer.poll();
-                    msxImage.setImageBitmap(poll.msxBitmap);
-                    photoImage.setImageBitmap(poll.dcBitmap);
-                }
-            });
-
         }
     };
 
@@ -341,18 +294,24 @@ public class MainActivity extends AppCompatActivity {
     private void setupViews() {
         connectionStatus = findViewById(R.id.connection_status_text);
         discoveryStatus = findViewById(R.id.discovery_status);
-
-        msxImage = findViewById(R.id.msx_image);
-        photoImage = findViewById(R.id.photo_image);
     }
 
     /** Called when the user taps the Send button */
-    public void startScan(View view) {
+    public void onStartClick(View view) {
         // Do something in response to button
-        Intent intent = new Intent(this, ScanActivity.class);
+        startProcessing();
+    }
+
+    public void startProcessing(){
+        MyApplication app = (MyApplication) getApplicationContext();
+        app.setCameraHandler(cameraHandler); // to be restored in ProcessingActivity
+        app.setBarcodeScanner(barcodeScanner);
+
+        Intent intent = new Intent(this, ProcessingActivity.class);
 //        EditText editText = (EditText) findViewById(R.id.editText);
 //        String message = editText.getText().toString();
 //        intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
+        connectedIdentity = null; // ???
     }
 }

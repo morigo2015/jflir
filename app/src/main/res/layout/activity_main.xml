@@ -83,7 +83,7 @@
         android:id="@+id/buttonStart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="startScan"
+        android:onClick="onStartClick"
         android:text="START" />
 
     <TextView
@@ -96,7 +96,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
+<!--
         <ImageView
             android:id="@+id/photo_image"
             android:layout_width="380dp"
@@ -122,6 +122,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/photo_image"
             app:layout_constraintTop_toTopOf="parent" />
+-->
 
         <!--
     <LinearLayout

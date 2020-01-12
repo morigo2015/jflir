@@ -227,9 +227,7 @@ class CameraHandler {
 
             //Get a bitmap with the visual image, it might have different dimensions then the bitmap from THERMAL_ONLY
             Bitmap dcBitmap = BitmapAndroid.createBitmap(thermalImage.getFusion().getPhoto()).getBitMap();
-            //            dcBitmap = drawText(dcBitmap);
 
-            dcBitmap = barcodeScanner.scanBarcode(dcBitmap);
             Log.d(TAG,"adding images to cache");
             streamDataListener.images(msxBitmap,dcBitmap);
 

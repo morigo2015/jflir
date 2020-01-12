@@ -19,7 +19,7 @@ class BarcodeScanner {
 
     private BarcodeDetector detector;
 
-    public BarcodeScanner(Context context) {
+    BarcodeScanner(Context context) {
         detector = new BarcodeDetector.Builder(context)
                 .setBarcodeFormats(Barcode.EAN_13 | Barcode.QR_CODE)
                 .build();
@@ -29,33 +29,27 @@ class BarcodeScanner {
         }
     }
 
-    public final Bitmap scanBarcode(Bitmap bitmap){
+    public final SparseArray<Barcode> scanBarcode(Bitmap bitmap) {
+        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+        SparseArray<Barcode> barcodes = detector.detect(frame);
+        for (int index = 0; index < barcodes.size(); index++) {
+            Barcode code = barcodes.valueAt(index);
+            Log.d(TAG, "index = " + index + "\n");
+            Log.d(TAG, "displayValue = " + code.displayValue + "\n");
+            Log.d(TAG, "rawValue = " + code.rawValue + "\n");
+            Log.d(TAG, "valueFormat = " + code.valueFormat + "\n");
 
-        if (detector.isOperational() && bitmap != null) {
-            Frame frame = new Frame.Builder().setBitmap(bitmap).build();
-            SparseArray<Barcode> barcodes = detector.detect(frame);
-            for (int index = 0; index < barcodes.size(); index++) {
-                Barcode code = barcodes.valueAt(index);
-                Log.d(TAG,"index = " + index + "\n");
-                Log.d(TAG,"displayValue = " + code.displayValue + "\n");
-                Log.d(TAG,"rawValue = " + code.rawValue + "\n");
-                Log.d(TAG,"valueFormat = " + code.valueFormat + "\n");
-
-                bitmap = drawText(bitmap, code.rawValue);
-            }
-            if (barcodes.size() == 0) {
-                Log.d(TAG, "No barcode detected. Please try again.");
-            }
-        } else {
-            Log.e(TAG,"Detector initialisation failed");
+            bitmap = drawText(bitmap, code.rawValue);
         }
-
-        return bitmap;
+        if (barcodes.size() == 0) {
+            Log.d(TAG, "No barcode detected. Please try again.");
+        }
+        return barcodes;
     }
 
 
-    private final Bitmap drawText(Bitmap bitmap, String text){
-        bitmap = bitmap.copy(android.graphics.Bitmap.Config.ARGB_8888,true);
+    public final Bitmap drawText(Bitmap bitmap, String text) {
+        bitmap = bitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
 
         Paint paint = new Paint();
