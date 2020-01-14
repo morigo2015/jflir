@@ -67,21 +67,30 @@ class BarcodeScanner {
         return barcodes;
     }
 
-    public final Bitmap drawCode(Bitmap bitmap, Barcode barcode){
+    public final Bitmap drawCode(Bitmap bitmap, Barcode barcode, boolean need_scale) {
+
+        float IR_TO_VISUAL_RATIO = (float) (640. / 1440.);
+
         bitmap = bitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
 
         Point[] points = barcode.cornerPoints;
+        if (need_scale) {
+            for (Point point : points) {
+                point.x = (int) (point.x * IR_TO_VISUAL_RATIO);
+                point.y = (int) (point.y * IR_TO_VISUAL_RATIO);
+            }
+        }
         Path path = new Path();
         path.reset();
-        path.moveTo(points[0].x,points[0].y);
-        for (int i=1; i<points.length; i++){
-            path.lineTo(points[i].x,points[i].y);
+        path.moveTo(points[0].x, points[0].y);
+        for (int i = 1; i < points.length; i++) {
+            path.lineTo(points[i].x, points[i].y);
         }
-        path.lineTo(points[0].x,points[0].y);
+        path.lineTo(points[0].x, points[0].y);
 
         // Draws the bounding box around the BarcodeBlock.
-        canvas.drawPath(path,rectPaint);
+        canvas.drawPath(path, rectPaint);
 
         // Renders the barcode at the bottom of the box.
         RectF rect = new RectF(barcode.getBoundingBox());

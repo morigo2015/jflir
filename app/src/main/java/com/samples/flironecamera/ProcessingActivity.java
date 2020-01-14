@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,8 +18,7 @@ public class ProcessingActivity extends AppCompatActivity {
 
     private static final String TAG = "ProcessingActivity";
 
-    private ImageView msxImage;
-    private ImageView photoImage;
+    private ImageView image;
 
     private LinkedBlockingQueue<FrameDataHolder> framesBuffer = new LinkedBlockingQueue(21);
 
@@ -35,8 +33,7 @@ public class ProcessingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_processing);
 
-        msxImage = findViewById(R.id.msx_image);
-        photoImage = findViewById(R.id.photo_image);
+        image = findViewById(R.id.image);
 
         Button btnScan = findViewById(R.id.btnScan);
 
@@ -52,7 +49,7 @@ public class ProcessingActivity extends AppCompatActivity {
     public void onButtonScanClick(View v) {
         if (screenMode.getMode() == Mode.FOUND) {
             screenMode.setMode(Mode.SEARCH);
-            Log.d(TAG,"Mode changed to SEARCH");
+            Log.d(TAG, "Mode changed to SEARCH");
         }
     }
 
@@ -63,18 +60,14 @@ public class ProcessingActivity extends AppCompatActivity {
     }
 
     void showImages(Bitmap msxBitmap, Bitmap dcBitmap) {
-        if (screenMode.getMode() == Mode.FOUND) return;
-        SparseArray<Barcode> barcodes = barcodeScanner.scanBarcode(dcBitmap);
-        if (barcodes.size() > 0) { // code(s) is(are) found
-            Barcode barcode_0 = barcodes.valueAt(0);
-            String code = barcode_0.rawValue;
-//            dcBitmap = barcodeScanner.drawText(dcBitmap, code);
-            dcBitmap = barcodeScanner.drawCode(dcBitmap, barcode_0);
-            screenMode.setMode(Mode.FOUND);
-            Log.d(TAG,barcodes.size() + "code(s) found. Mode changed to FOUND");
+        switch (screenMode.getMode()) {
+            case SEARCH:
+                image.setImageBitmap(dcBitmap);
+                break;
+            case FOUND:
+                image.setImageBitmap(msxBitmap);
+                break;
         }
-        msxImage.setImageBitmap(msxBitmap);
-        photoImage.setImageBitmap(dcBitmap);
     }
 
     private final CameraHandler.StreamDataListener streamDataListener = new CameraHandler.StreamDataListener() {
@@ -92,6 +85,17 @@ public class ProcessingActivity extends AppCompatActivity {
 
         @Override
         public void images(Bitmap msxBitmap, Bitmap dcBitmap) {
+
+            if (screenMode.getMode() == Mode.FOUND) return;
+            SparseArray<Barcode> barcodes = barcodeScanner.scanBarcode(dcBitmap);
+            if (barcodes.size() > 0) { // code(s) is(are) found
+                Barcode barcode_0 = barcodes.valueAt(0);
+                String code = barcode_0.rawValue;
+//                dcBitmap = barcodeScanner.drawCode(dcBitmap, barcode_0, false);
+                msxBitmap = barcodeScanner.drawCode(msxBitmap, barcode_0, true);
+                screenMode.setMode(Mode.FOUND);
+                Log.d(TAG, barcodes.size() + "code(s) found. Mode changed to FOUND");
+            }
 
             try {
                 framesBuffer.put(new FrameDataHolder(msxBitmap, dcBitmap));
