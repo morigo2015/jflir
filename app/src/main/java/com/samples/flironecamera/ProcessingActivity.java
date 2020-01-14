@@ -68,7 +68,8 @@ public class ProcessingActivity extends AppCompatActivity {
         if (barcodes.size() > 0) { // code(s) is(are) found
             Barcode barcode_0 = barcodes.valueAt(0);
             String code = barcode_0.rawValue;
-            dcBitmap = barcodeScanner.drawText(dcBitmap, code);
+//            dcBitmap = barcodeScanner.drawText(dcBitmap, code);
+            dcBitmap = barcodeScanner.drawCode(dcBitmap, barcode_0);
             screenMode.setMode(Mode.FOUND);
             Log.d(TAG,barcodes.size() + "code(s) found. Mode changed to FOUND");
         }
